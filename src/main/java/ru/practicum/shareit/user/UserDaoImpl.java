@@ -6,7 +6,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import java.util.*;
 
 @Repository
-public class UserDaoImpl implements UserDao{
+public class UserDaoImpl implements UserDao {
     private final Map<Long, User> users = new HashMap<>();
 
 
