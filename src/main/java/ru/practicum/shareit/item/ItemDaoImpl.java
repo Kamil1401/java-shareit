@@ -57,7 +57,7 @@ public class ItemDaoImpl implements ItemDao {
         return items.values().stream()
                 .filter(Item::getAvailable)
                 .filter(item -> item.getName().toLowerCase().contains(lowerText)
-                                        || item.getDescription().toLowerCase().contains(lowerText))
+                        || item.getDescription().toLowerCase().contains(lowerText))
                 .toList();
     }
 
