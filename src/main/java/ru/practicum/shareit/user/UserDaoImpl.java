@@ -1,11 +1,10 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.*;
 
-@Repository
+
 public class UserDaoImpl implements UserDao {
     private final Map<Long, User> users = new HashMap<>();
 
@@ -24,11 +23,10 @@ public class UserDaoImpl implements UserDao {
             throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден");
         }
 
-        storedUser = User.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+        storedUser.setId(user.getId());
+        storedUser.setName(user.getName());
+        storedUser.setEmail(user.getEmail());
+
         users.put(storedUser.getId(), storedUser);
 
         return storedUser;

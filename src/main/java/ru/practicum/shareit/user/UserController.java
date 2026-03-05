@@ -4,9 +4,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @RequiredArgsConstructor
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 @RestController
 public class UserController {
     private final UserService userService;
@@ -26,7 +27,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable @Positive Long userId) {
-        return userService.getUserDto(userId);
+        return userService.getAboutUser(userId);
     }
 
     @DeleteMapping("/{userId}")

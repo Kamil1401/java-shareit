@@ -1,10 +1,8 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.stereotype.Repository;
-
 import java.util.*;
 
-@Repository
+
 public class ItemDaoImpl implements ItemDao {
     private final Map<Long, Item> items = new HashMap<>();
 
@@ -20,14 +18,12 @@ public class ItemDaoImpl implements ItemDao {
             throw new NoSuchElementException("Пользователь с id = " + item.getId() + " не найден");
         }
 
-        storedItem = Item.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .owner(item.getOwner())
-                .request(item.getRequest())
-                .build();
+        storedItem.setId(item.getId());
+        storedItem.setName(item.getName());
+        storedItem.setDescription(item.getDescription());
+        storedItem.setAvailable(item.getAvailable());
+        storedItem.setOwner(item.getOwner());
+
         items.put(storedItem.getId(), storedItem);
 
         return storedItem;
