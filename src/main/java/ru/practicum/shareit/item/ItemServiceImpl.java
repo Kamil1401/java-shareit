@@ -138,8 +138,8 @@ public class ItemServiceImpl implements ItemService {
                             .findFirst()
                             .orElse(null);
 
-                    List<CommentDto> comments = commentRepository.
-                            findByItemIdOrderByCreatedAsc(item.getId())
+                    List<CommentDto> comments = commentRepository
+                            .findByItemIdOrderByCreatedAsc(item.getId())
                             .stream()
                             .map(CommentMapper::toCommentDto)
                             .toList();
