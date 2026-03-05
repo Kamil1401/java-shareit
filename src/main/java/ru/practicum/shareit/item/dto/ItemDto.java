@@ -11,7 +11,8 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 import java.util.List;
 
 @Builder
-@Getter @Setter
+@Getter
+@Setter
 public class ItemDto {
 
     @PositiveOrZero

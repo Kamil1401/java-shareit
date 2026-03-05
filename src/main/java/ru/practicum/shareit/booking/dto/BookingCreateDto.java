@@ -7,7 +7,8 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Builder
-@Getter @Setter
+@Getter
+@Setter
 public class BookingCreateDto {
     private LocalDateTime start;
     private LocalDateTime end;

@@ -145,7 +145,7 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case ALL -> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
             case CURRENT -> bookings =
-                    bookingRepository.findCurrentBookingsByItemOwnerId(userId, now) ;
+                    bookingRepository.findCurrentBookingsByItemOwnerId(userId, now);
             case PAST -> bookings =
                     bookingRepository.findPastBookingsByItemOwnerId(userId, now);
             case FUTURE -> bookings =
