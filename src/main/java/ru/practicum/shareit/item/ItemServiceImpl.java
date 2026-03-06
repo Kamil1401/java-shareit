@@ -1,11 +1,11 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -47,10 +47,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemId);
         LocalDateTime now = LocalDateTime.now();
 
-        boolean hasBooking = bookingRepository.existsCompletedBooking(userId, itemId, BookingStatus.APPROVED, now);
-
-        if (!hasBooking) {
-            throw new NotOwnerException("Пользователь не является арендатором");
+        if (!bookingRepository.existsCompletedBooking(userId, itemId, now)) {
+            throw new ValidationException("Пользователь не может комментировать");
         }
 
         Comment comment = new Comment();
@@ -71,6 +69,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(Long userId, Long itemId, ItemDto dto) {
+
         Item item = getItemById(itemId);
 
         if (!Objects.equals(userId, item.getOwner().getId())) {

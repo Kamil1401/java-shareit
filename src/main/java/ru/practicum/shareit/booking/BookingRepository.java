@@ -113,9 +113,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             FROM Booking b
             WHERE b.item.id = :itemId
               AND b.booker.id = :bookerId
-              AND b.status = :status
               AND b.end < :time
             """)
     boolean existsCompletedBooking(
-            Long itemId, Long bookerId, BookingStatus status, LocalDateTime time);
+            Long itemId, Long bookerId, LocalDateTime time);
 }
