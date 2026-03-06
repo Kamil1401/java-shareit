@@ -47,8 +47,10 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemId);
         LocalDateTime now = LocalDateTime.now();
 
-        if (!bookingRepository.existsCompletedBooking(userId, itemId, now)) {
-            throw new ValidationException("Пользователь не может комментировать");
+        boolean hasBooking = bookingRepository.existsCompletedBooking(itemId, userId, now);
+
+        if (!hasBooking) {
+            throw new ValidationException("Невозможно оставить комментарий");
         }
 
         Comment comment = new Comment();
