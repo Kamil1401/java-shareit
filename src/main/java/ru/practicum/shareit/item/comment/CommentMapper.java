@@ -5,7 +5,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 public class CommentMapper {
 
 
-    public static CommentDto toCommentDto(Comment comment) {
+    public static CommentDto toDto(Comment comment) {
         return CommentDto.builder()
                 .id(comment.getId())
                 .text(comment.getText())

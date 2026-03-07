@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -47,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItemById(itemId);
         LocalDateTime now = LocalDateTime.now();
 
-        boolean hasBooking = bookingRepository.existsCompletedBooking(itemId, userId, now);
+        boolean hasBooking = bookingRepository.existsByItemIdAndBookerIdAndEndBefore(itemId, userId, now);
 
         if (!hasBooking) {
             throw new ValidationException("Невозможно оставить комментарий");
@@ -61,12 +62,7 @@ public class ItemServiceImpl implements ItemService {
 
         Comment saved = commentRepository.save(comment);
 
-        return CommentDto.builder()
-                .id(saved.getId())
-                .text(saved.getText())
-                .authorName(saved.getAuthor().getName())
-                .created(saved.getCreated())
-                .build();
+        return CommentMapper.toDto(saved);
     }
 
     @Override
@@ -104,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
 
         List<CommentDto> comments = commentRepository.findByItemIdOrderByCreatedAsc(itemId)
                 .stream()
-                .map(CommentMapper::toCommentDto)
+                .map(CommentMapper::toDto)
                 .toList();
 
         dto.setComments(comments);
@@ -128,13 +124,15 @@ public class ItemServiceImpl implements ItemService {
                     ItemDto dto = ItemMapper.toDto(item);
 
                     Booking last = bookingRepository
-                            .findLast(item.getId(), now)
+                            .findByItemIdAndStartBeforeAndStatusOrderByStartDesc(
+                                    item.getId(), now, BookingStatus.APPROVED)
                             .stream()
                             .findFirst()
                             .orElse(null);
 
                     Booking next = bookingRepository
-                            .findNext(item.getId(), now)
+                            .findByItemIdAndStartAfterAndStatusOrderByStartAsc(
+                                    item.getId(), now, BookingStatus.APPROVED)
                             .stream()
                             .findFirst()
                             .orElse(null);
@@ -142,11 +140,11 @@ public class ItemServiceImpl implements ItemService {
                     List<CommentDto> comments = commentRepository
                             .findByItemIdOrderByCreatedAsc(item.getId())
                             .stream()
-                            .map(CommentMapper::toCommentDto)
+                            .map(CommentMapper::toDto)
                             .toList();
 
-                    dto.setLastBooking(BookingMapper.toBookingShortDto(last));
-                    dto.setNextBooking(BookingMapper.toBookingShortDto(next));
+                    dto.setLastBooking(BookingMapper.toShortDto(last));
+                    dto.setNextBooking(BookingMapper.toShortDto(next));
                     dto.setComments(comments);
 
                     return dto;

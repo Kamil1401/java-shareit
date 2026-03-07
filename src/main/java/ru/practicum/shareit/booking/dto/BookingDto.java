@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +15,11 @@ import java.time.LocalDateTime;
 @Setter
 public class BookingDto {
     private Long id;
+
+    @NotNull(message = "Дата начала обязательна")
     private LocalDateTime start;
+
+    @NotNull(message = "Дата окончания обязательна")
     private LocalDateTime end;
     private BookingStatus status;
 

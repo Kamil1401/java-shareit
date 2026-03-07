@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemShortDto;
 
 public class ItemMapper {
 
@@ -22,5 +23,9 @@ public class ItemMapper {
         item.setAvailable(dto.getAvailable());
 
         return item;
+    }
+
+    public static ItemShortDto toShortDto(Item item) {
+        return new ItemShortDto(item.getId(), item.getName());
     }
 }

@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
         if (userOpt.isPresent()) {
             throw new DuplicateException("Пользователь с таким Email уже существует");
         }
-        User user = UserMapper.toUser(dto);
+        User user = UserMapper.toEntity(dto);
         userRepository.save(user);
 
         return UserMapper.toDto(user);
