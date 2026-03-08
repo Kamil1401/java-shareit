@@ -5,7 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemDao;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,19 +14,19 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserDao userInMemoryDao;
-    private final ItemDao itemInMemoryDao;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
 
     @Override
     public UserDto createUser(UserDto dto) {
-        Optional<User> userOpt = userInMemoryDao.findByEmail(dto.getEmail());
+        Optional<User> userOpt = userRepository.findByEmail(dto.getEmail());
 
         if (userOpt.isPresent()) {
             throw new DuplicateException("Пользователь с таким Email уже существует");
         }
-        User user = UserMapper.toUser(dto);
-        userInMemoryDao.save(user);
+        User user = UserMapper.toEntity(dto);
+        userRepository.save(user);
 
         return UserMapper.toDto(user);
     }
@@ -38,26 +39,26 @@ public class UserServiceImpl implements UserService {
             user.setName(dto.getName());
         }
         if (dto.getEmail() != null) {
-            Optional<User> userWithSameEmail = userInMemoryDao.findByEmail(dto.getEmail());
+            Optional<User> userWithSameEmail = userRepository.findByEmail(dto.getEmail());
 
             if (userWithSameEmail.isPresent() && !userWithSameEmail.get().getId().equals(userId)) {
                 throw new DuplicateException("Пользователь с таким Email уже существует");
             }
             user.setEmail(dto.getEmail());
         }
-        userInMemoryDao.save(user);
+        userRepository.save(user);
 
         return UserMapper.toDto(user);
     }
 
     @Override
     public User getUserById(Long id) {
-        return userInMemoryDao.findById(id)
+        return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     @Override
-    public UserDto getUserDto(Long id) {
+    public UserDto getAboutUser(Long id) {
         User user = getUserById(id);
 
         return UserMapper.toDto(user);
@@ -65,14 +66,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return userInMemoryDao.findAll();
+        return userRepository.findAll();
     }
 
     @Override
     public void deleteUser(Long id) {
         getUserById(id);
-        List<Item> items = itemInMemoryDao.findByOwnerId(id);
-        items.forEach(item -> itemInMemoryDao.delete(item.getId()));
-        userInMemoryDao.delete(id);
+        List<Item> items = itemRepository.findByOwner_Id(id);
+        items.forEach(item -> itemRepository.deleteById(item.getId()));
+        userRepository.deleteById(id);
     }
 }

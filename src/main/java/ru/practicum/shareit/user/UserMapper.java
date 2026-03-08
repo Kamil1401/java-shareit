@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.stereotype.Component;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserShortDto;
 
-@Component
 public class UserMapper {
 
 
@@ -14,11 +14,16 @@ public class UserMapper {
                 .build();
     }
 
-    public static User toUser(UserDto dto) {
-        return User.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .build();
+    public static User toEntity(UserDto dto) {
+        User user = new User();
+        user.setId(dto.getId());
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+
+        return user;
+    }
+
+    public static UserShortDto toShortDto(User user) {
+        return new UserShortDto(user.getId(), user.getName());
     }
 }
