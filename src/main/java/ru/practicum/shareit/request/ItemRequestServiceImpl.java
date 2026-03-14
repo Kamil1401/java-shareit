@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository requestRepository;
     private final UserService userService;
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
 
 
     @Override
@@ -44,7 +44,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .map(ItemRequest::getId)
                 .toList();
 
-        Map<Long, List<Item>> itemsByRequests = itemService.getItemsByRequestIdIn(ids).stream()
+        Map<Long, List<Item>> itemsByRequests = itemRepository.findByRequestIdIn(ids).stream()
                 .collect(Collectors.groupingBy(item -> item.getRequest().getId()));
 
         return requests.stream()
@@ -75,7 +75,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto getAboutItemRequest(Long requestId) {
         ItemRequest request = getItemRequestById(requestId);
 
-        List<ItemShortDto> answers = ItemMapper.toShortList(itemService.getAllItems().stream()
+        List<ItemShortDto> answers = ItemMapper.toShortList(itemRepository.findAll().stream()
                 .filter(item -> item.getRequest().getId().equals(requestId))
                 .toList());
 
