@@ -24,6 +24,8 @@ public interface ItemService {
 
     List<ItemDto> getUserItems(Long userId);
 
+    List<Item> getItemsByRequestIdIn(List<Long> ids);
+
     List<ItemDto> searchItems(String text);
 
     void deleteItem(Long itemId);

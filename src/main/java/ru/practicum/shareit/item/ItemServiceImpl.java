@@ -15,6 +15,8 @@ import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -30,13 +32,20 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestService requestService;
 
 
     @Override
-    public ItemDto addItem(Long ownerId, ItemDto dto) {
-        User owner = userService.getUserById(ownerId);
+    public ItemDto addItem(Long userId, ItemDto dto) {
+        User owner = userService.getUserById(userId);
         Item item = ItemMapper.toItem(dto);
         item.setOwner(owner);
+
+        if (dto.getRequestId() !=null) {
+            ItemRequest request = requestService.getItemRequestById(dto.getRequestId());
+            item.setRequest(request);
+        }
+
         Item savedItem = itemRepository.save(item);
 
         return ItemMapper.toDto(savedItem);
@@ -150,6 +159,11 @@ public class ItemServiceImpl implements ItemService {
                     return dto;
                 })
                 .toList();
+    }
+
+    @Override
+    public List<Item> getItemsByRequestIdIn(List<Long> ids) {
+        return itemRepository.findByRequestIdIn(ids);
     }
 
     @Override

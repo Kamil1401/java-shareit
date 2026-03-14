@@ -17,9 +17,11 @@ CREATE TABLE IF NOT EXISTS items
     available       BOOLEAN NOT NULL,
 
     user_id         BIGINT NOT NULL,
+    request_id      BIGINT,
 
     CONSTRAINT items_pk PRIMARY KEY (id),
     CONSTRAINT items_user_fk FOREIGN KEY (user_id) REFERENCES users (id)
+    CONSTRAINT items_request_fk FOREIGN KEY (request_id) REFERENCES requests (id)
 );
 
 
