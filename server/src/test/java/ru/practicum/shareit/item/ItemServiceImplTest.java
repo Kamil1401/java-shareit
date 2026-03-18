@@ -1,18 +1,26 @@
 package ru.practicum.shareit.item;
 
 import jakarta.persistence.EntityManager;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest(
@@ -63,5 +71,129 @@ class ItemServiceImplTest {
 
         assertEquals(items.getFirst().getName(), firstItem.getName());
         assertEquals(items.getLast().getDescription(), secondItem.getDescription());
+    }
+
+    @Test
+    void addComment() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Naruto")
+                .email("Uzumaki@ninja.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Sasuke")
+                .email("Uchiha@ninja.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Rasengan")
+                .description("Техника")
+                .available(true)
+                .build());
+
+        Booking booking = new Booking();
+        booking.setItem(entityManager.find(Item.class, item.getId()));
+        booking.setBooker(entityManager.find(User.class, booker.getId()));
+        booking.setStart(LocalDateTime.now().minusDays(2));
+        booking.setEnd(LocalDateTime.now().minusDays(1));
+        booking.setStatus(BookingStatus.APPROVED);
+        entityManager.persist(booking);
+
+        CommentCreateDto dto = new CommentCreateDto();
+        dto.setText("Лучшая техника в Конохе!");
+
+        CommentDto result = itemService.addComment(booker.getId(), item.getId(), dto);
+
+        assertEquals("Лучшая техника в Конохе!", result.getText());
+    }
+
+    @Test
+    void addComment_withoutBooking() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("User")
+                .email("user@mail.com")
+                .build());
+
+        ItemDto item = itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        CommentCreateDto dto = new CommentCreateDto();
+        dto.setText("Неудачный комментарий");
+
+        assertThrows(ValidationException.class,
+                () -> itemService.addComment(user.getId(), item.getId(), dto));
+    }
+
+    @Test
+    void getAboutItem() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Orochimaro")
+                .email("Snake@ninja.com")
+                .build());
+
+        ItemDto item = itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Эдо тенсей")
+                .description("Техника воскрешения")
+                .available(true)
+                .build());
+
+        Comment comment = new Comment();
+        comment.setText("Нужна жертва");
+        comment.setItem(entityManager.find(Item.class, item.getId()));
+        comment.setAuthor(entityManager.find(User.class, user.getId()));
+        comment.setCreated(LocalDateTime.now());
+        entityManager.persist(comment);
+
+        ItemDto result = itemService.getAboutItem(item.getId());
+
+        assertEquals(1, result.getComments().size());
+    }
+
+    @Test
+    void searchItems() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Shikamaru")
+                .email("nara@ino-shiko-che.com")
+                .build());
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Серьги")
+                .description("Символ от клана Сарутоби")
+                .available(true)
+                .build());
+
+        List<ItemDto> result = itemService.searchItems("Серьги");
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void searchItems_blank_shouldReturnEmpty() {
+        List<ItemDto> result = itemService.searchItems("");
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void deleteItem() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Madara")
+                .email("Sharingan@ninja.com")
+                .build());
+
+        ItemDto item = itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Rinnegan")
+                .description("Глаз Сансары")
+                .available(true)
+                .build());
+
+        itemService.deleteItem(item.getId());
+
+        Item found = entityManager.find(Item.class, item.getId());
+
+        assertNull(found);
     }
 }
