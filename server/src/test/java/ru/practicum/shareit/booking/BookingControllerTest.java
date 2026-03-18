@@ -124,7 +124,7 @@ class BookingControllerTest {
     @Test
     void getUserBookings() throws Exception {
         ItemShortDto itemShortDto1 = new ItemShortDto(7L, "Молоток", 9L);
-        ItemShortDto itemShortDto2 = new ItemShortDto(10L, "Молоток", 12L);
+        ItemShortDto itemShortDto2 = new ItemShortDto(10L, "Отвёртка", 12L);
 
         UserShortDto userShortDto = new UserShortDto(8L, "Эдуард");
 
