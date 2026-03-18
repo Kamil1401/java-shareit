@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -35,42 +36,31 @@ class ItemServiceImplTest {
 
 
     @Test
-    void getUserItems() {
-        UserDto userDto = UserDto.builder()
-                .name("Кларк")
-                .email("Kent@smallville.com")
-                .build();
-        UserDto savedUser = userService.createUser(userDto);
+    void addItem() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Eric")
+                .email("Brooks@hate-vampire.com")
+                .build());
 
-        ItemDto firstItemDto = ItemDto.builder()
-                .name("Karcher CVH 3")
-                .description("Пылесос для автомобиля")
+        ItemRequest request = new ItemRequest();
+        request.setDescription("Ищу меч");
+        request.setCreated(LocalDateTime.now());
+        request.setRequestor(entityManager.find(User.class, user.getId()));
+        entityManager.persist(request);
+
+        ItemDto dto = ItemDto.builder()
+                .name("Меч")
+                .description("Брать только Блэйду")
                 .available(true)
+                .requestId(request.getId())
                 .build();
 
-        ItemDto secondItemDto = ItemDto.builder()
-                .name("Палатка")
-                .description("Туристическая палатка на 6 человек")
-                .available(true)
-                .build();
+        ItemDto saved = itemService.addItem(user.getId(), dto);
 
-        itemService.addItem(savedUser.getId(), firstItemDto);
-        itemService.addItem(savedUser.getId(), secondItemDto);
+        Item item = entityManager.find(Item.class, saved.getId());
 
-        List<ItemDto> items = itemService.getUserItems(savedUser.getId());
-
-
-        Item firstItem = entityManager.createQuery("SELECT i FROM Item i WHERE i.name = :name", Item.class)
-                .setParameter("name", "Karcher CVH 3")
-                .getSingleResult();
-
-        Item secondItem = entityManager.createQuery("SELECT i FROM Item i WHERE i.name = :name", Item.class)
-                .setParameter("name", "Палатка")
-                .getSingleResult();
-
-
-        assertEquals(items.getFirst().getName(), firstItem.getName());
-        assertEquals(items.getLast().getDescription(), secondItem.getDescription());
+        assertEquals("Меч", item.getName());
+        assertEquals(request.getId(), item.getRequest().getId());
     }
 
     @Test
@@ -128,6 +118,28 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void updateItem() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Abraham")
+                .email("Van-Helsing@kill-vampire.com")
+                .build());
+
+        ItemDto item = itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Арбалет")
+                .description("В комплекте стрелы")
+                .available(true)
+                .build());
+
+        ItemDto update = ItemDto.builder()
+                .name("Hugh")
+                .build();
+
+        ItemDto updated = itemService.updateItem(user.getId(), item.getId(), update);
+
+        assertEquals("Hugh", updated.getName());
+    }
+
+    @Test
     void getAboutItem() {
         UserDto user = userService.createUser(UserDto.builder()
                 .name("Orochimaro")
@@ -150,6 +162,45 @@ class ItemServiceImplTest {
         ItemDto result = itemService.getAboutItem(item.getId());
 
         assertEquals(1, result.getComments().size());
+    }
+
+    @Test
+    void getUserItems() {
+        UserDto userDto = UserDto.builder()
+                .name("Кларк")
+                .email("Kent@smallville.com")
+                .build();
+        UserDto savedUser = userService.createUser(userDto);
+
+        ItemDto firstItemDto = ItemDto.builder()
+                .name("Karcher CVH 3")
+                .description("Пылесос для автомобиля")
+                .available(true)
+                .build();
+
+        ItemDto secondItemDto = ItemDto.builder()
+                .name("Палатка")
+                .description("Туристическая палатка на 6 человек")
+                .available(true)
+                .build();
+
+        itemService.addItem(savedUser.getId(), firstItemDto);
+        itemService.addItem(savedUser.getId(), secondItemDto);
+
+        List<ItemDto> items = itemService.getUserItems(savedUser.getId());
+
+
+        Item firstItem = entityManager.createQuery("SELECT i FROM Item i WHERE i.name = :name", Item.class)
+                .setParameter("name", "Karcher CVH 3")
+                .getSingleResult();
+
+        Item secondItem = entityManager.createQuery("SELECT i FROM Item i WHERE i.name = :name", Item.class)
+                .setParameter("name", "Палатка")
+                .getSingleResult();
+
+
+        assertEquals(items.getFirst().getName(), firstItem.getName());
+        assertEquals(items.getLast().getDescription(), secondItem.getDescription());
     }
 
     @Test

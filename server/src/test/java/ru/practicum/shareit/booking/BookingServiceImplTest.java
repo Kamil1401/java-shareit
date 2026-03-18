@@ -32,6 +32,93 @@ class BookingServiceImplTest {
 
 
     @Test
+    void create() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Scott")
+                .email("Summers@x-men.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Henry")
+                .email("McCoy@x-men.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.of(2026, 3, 4, 15, 0))
+                .end(LocalDateTime.of(2026, 3, 4, 15, 30))
+                .itemId(item.getId())
+                .build();
+
+        BookingDto result = bookingService.create(booker.getId(), dto);
+
+        assertEquals(item.getId(), result.getItem().getId());
+    }
+
+    @Test
+    void confirmBooking_approved() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Bruce")
+                .email("Wayne@gotham.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Selina")
+                .email("Kyle@gotham.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Бэтмобиль")
+                .description("Много слов")
+                .available(true)
+                .build());
+
+        BookingDto booking = bookingService.create(booker.getId(), BookingCreateDto.builder()
+                .start(LocalDateTime.of(2026, 3, 6, 18, 0))
+                .end(LocalDateTime.of(2026, 3, 7, 10, 30))
+                .itemId(item.getId())
+                .build());
+
+        BookingDto result = bookingService.confirmBooking(booking.getId(), owner.getId(), true);
+
+        assertEquals(BookingStatus.APPROVED, result.getStatus());
+    }
+
+    @Test
+    void getAboutBooking_success() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Clark")
+                .email("Kent@Smallville.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Lois")
+                .email("Lane-Kent@Smallville.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Вещь")
+                .description("Описание")
+                .available(true)
+                .build());
+
+        BookingDto booking = bookingService.create(booker.getId(), BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build());
+
+        BookingDto result = bookingService.getAboutBooking(booker.getId(), booking.getId());
+
+        assertEquals(booking.getId(), result.getId());
+    }
+
+    @Test
     void findBookingsByUserId() {
         UserDto firstUserDto = UserDto.builder()
                 .name("J. Jonah")
