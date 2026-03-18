@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.UserService;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest(
@@ -90,6 +92,64 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void confirmBooking_notOwner_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Bruce")
+                .email("Wayne@gotham.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Selina")
+                .email("Kyle@gotham.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Бэтмобиль")
+                .description("Много слов")
+                .available(true)
+                .build());
+
+        BookingDto booking = bookingService.create(booker.getId(), BookingCreateDto.builder()
+                .start(LocalDateTime.of(2026, 3, 6, 18, 0))
+                .end(LocalDateTime.of(2026, 3, 7, 10, 30))
+                .itemId(item.getId())
+                .build());
+
+        assertThrows(NotOwnerException.class,
+                () -> bookingService.confirmBooking(booking.getId(), booker.getId(), true));
+    }
+
+    @Test
+    void confirmBooking_alreadyProcessed_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Bruce")
+                .email("Wayne@gotham.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Selina")
+                .email("Kyle@gotham.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Бэтмобиль")
+                .description("Много слов")
+                .available(true)
+                .build());
+
+        BookingDto booking = bookingService.create(booker.getId(), BookingCreateDto.builder()
+                .start(LocalDateTime.of(2026, 3, 6, 18, 0))
+                .end(LocalDateTime.of(2026, 3, 7, 10, 30))
+                .itemId(item.getId())
+                .build());
+
+        bookingService.confirmBooking(booking.getId(), owner.getId(), true);
+
+        assertThrows(IllegalStateException.class,
+                () -> bookingService.confirmBooking(booking.getId(), owner.getId(), true));
+    }
+
+    @Test
     void getAboutBooking_success() {
         UserDto owner = userService.createUser(UserDto.builder()
                 .name("Clark")
@@ -108,8 +168,8 @@ class BookingServiceImplTest {
                 .build());
 
         BookingDto booking = bookingService.create(booker.getId(), BookingCreateDto.builder()
-                .start(LocalDateTime.now().plusDays(1))
-                .end(LocalDateTime.now().plusDays(2))
+                .start(LocalDateTime.of(2026, 3, 6, 18, 0))
+                .end(LocalDateTime.of(2026, 3, 7, 10, 30))
                 .itemId(item.getId())
                 .build());
 
@@ -178,5 +238,35 @@ class BookingServiceImplTest {
 
         assertEquals(booking2.getId(), pastBookings.getFirst().getId());
         assertEquals(booking1.getId(), pastBookings.getLast().getId());
+    }
+
+    @Test
+    void findBookingsByItemOwnerId_all() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Clark")
+                .email("Kent@Smallville.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Lois")
+                .email("Lane-Kent@Smallville.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Вещь")
+                .description("Описание")
+                .available(true)
+                .build());
+
+        bookingService.create(booker.getId(), BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build());
+
+        List<BookingDto> result =
+                bookingService.findBookingsByItemOwnerId(owner.getId(), BookingState.ALL);
+
+        assertEquals(1, result.size());
     }
 }
