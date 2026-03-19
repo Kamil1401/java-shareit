@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest(
@@ -29,6 +31,101 @@ class ItemRequestServiceImplTest {
     private final ItemService itemService;
     private final EntityManager entityManager;
 
+
+    @Test
+    void addRequest() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Barry Allen")
+                .email("speed@central-city.com")
+                .build());
+
+        ItemRequestDto dto = ItemRequestDto.builder()
+                .description("Нужен ноутбук")
+                .created(LocalDateTime.now())
+                .build();
+
+        ItemRequestDto result = requestService.addRequest(user.getId(), dto);
+
+        ItemRequest request = entityManager.find(ItemRequest.class, result.getId());
+
+        assertEquals("Нужен ноутбук", request.getDescription());
+    }
+
+    @Test
+    void getAllRequests_shouldReturnOnlyOthers() {
+        UserDto first = userService.createUser(UserDto.builder()
+                .name("First")
+                .email("first@mail.com")
+                .build());
+
+        UserDto second = userService.createUser(UserDto.builder()
+                .name("Second")
+                .email("second@mail.com")
+                .build());
+
+        requestService.addRequest(first.getId(), ItemRequestDto.builder()
+                .description("Req1")
+                .created(LocalDateTime.now())
+                .build());
+
+        requestService.addRequest(second.getId(), ItemRequestDto.builder()
+                .description("Req2")
+                .created(LocalDateTime.now())
+                .build());
+
+        List<ItemRequestDto> result = requestService.getAllRequests(first.getId());
+
+        assertEquals(1, result.size());
+        assertEquals("Req2", result.getFirst().getDescription());
+    }
+
+    @Test
+    void getAboutItemRequest_withItems() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@mail.com")
+                .build());
+
+        UserDto requestor = userService.createUser(UserDto.builder()
+                .name("Requestor")
+                .email("req@mail.com")
+                .build());
+
+        ItemRequestDto request = requestService.addRequest(requestor.getId(),
+                ItemRequestDto.builder()
+                        .description("Нужен инструмент")
+                        .created(LocalDateTime.now())
+                        .build());
+
+        itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Drill")
+                .description("Tool")
+                .available(true)
+                .requestId(request.getId())
+                .build());
+
+        ItemRequestDto result = requestService.getAboutItemRequest(request.getId());
+
+        assertEquals(1, result.getItems().size());
+    }
+
+    @Test
+    void getAboutItemRequest_withoutItems() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("User")
+                .email("user@mail.com")
+                .build());
+
+        ItemRequestDto request = requestService.addRequest(user.getId(),
+                ItemRequestDto.builder()
+                        .description("Пустой запрос")
+                        .created(LocalDateTime.now())
+                        .build());
+
+        ItemRequestDto result = requestService.getAboutItemRequest(request.getId());
+
+        assertEquals(0, result.getItems().size());
+    }
 
     @Test
     void getUserRequests() {
@@ -89,5 +186,11 @@ class ItemRequestServiceImplTest {
 
         assertEquals(request2.getId(), requests.getFirst().getId());
         assertEquals(request1.getId(), requests.getLast().getId());
+    }
+
+    @Test
+    void getItemRequestById_notFound_shouldThrow() {
+        assertThrows(NotFoundException.class,
+                () -> requestService.getItemRequestById(999L));
     }
 }
