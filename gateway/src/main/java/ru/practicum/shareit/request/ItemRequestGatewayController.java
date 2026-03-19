@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +23,7 @@ public class ItemRequestGatewayController {
 
 
     @PostMapping
-    public ResponseEntity<Object> addRequest(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ResponseEntity<Object> addRequest(@RequestHeader(USER_ID_HEADER) @Positive Long userId,
                                              @Valid @RequestBody ItemRequestDto dto) {
 
         log.info("Gateway: create request userId={}, dto={}", userId, dto);
