@@ -169,8 +169,8 @@ class ItemRequestServiceImplTest {
                 .requestId(requestWithId2.getId())
                 .build();
 
-        ItemDto firstItemDtoWithId = itemService.addItem(ownerDto.getId(), firstItemDto);
-        ItemDto secondItemDtoWithId = itemService.addItem(ownerDto.getId(), secondItemDto);
+        itemService.addItem(ownerDto.getId(), firstItemDto);
+        itemService.addItem(ownerDto.getId(), secondItemDto);
 
         List<ItemRequestDto> requests = requestService.getUserRequests(requestorDto.getId());
 
