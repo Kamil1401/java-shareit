@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -137,6 +138,30 @@ class ItemServiceImplTest {
         ItemDto updated = itemService.updateItem(user.getId(), item.getId(), update);
 
         assertEquals("Hugh", updated.getName());
+    }
+
+    @Test
+    void updateItem_notOwner_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@mail.com")
+                .build());
+
+        UserDto other = userService.createUser(UserDto.builder()
+                .name("Other")
+                .email("other@mail.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        ItemDto update = ItemDto.builder().name("Hack").build();
+
+        assertThrows(NotOwnerException.class,
+                () -> itemService.updateItem(other.getId(), item.getId(), update));
     }
 
     @Test

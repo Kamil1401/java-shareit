@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import jakarta.persistence.EntityManager;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,85 @@ class BookingServiceImplTest {
         BookingDto result = bookingService.create(booker.getId(), dto);
 
         assertEquals(item.getId(), result.getItem().getId());
+    }
+
+    @Test
+    void create_itemNotAvailable_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@mail.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@mail.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(false)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        assertThrows(IllegalStateException.class,
+                () -> bookingService.create(booker.getId(), dto));
+    }
+
+    @Test
+    void create_ownerBooking_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@mail.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        assertThrows(ValidationException.class,
+                () -> bookingService.create(owner.getId(), dto));
+    }
+
+    @Test
+    void create_invalidDates_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@mail.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@mail.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(2))
+                .end(LocalDateTime.now().plusDays(1))
+                .itemId(item.getId())
+                .build();
+
+        assertThrows(ValidationException.class,
+                () -> bookingService.create(booker.getId(), dto));
     }
 
     @Test
@@ -150,7 +230,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getAboutBooking_success() {
+    void getAboutBooking() {
         UserDto owner = userService.createUser(UserDto.builder()
                 .name("Clark")
                 .email("Kent@Smallville.com")
@@ -176,6 +256,39 @@ class BookingServiceImplTest {
         BookingDto result = bookingService.getAboutBooking(booker.getId(), booking.getId());
 
         assertEquals(booking.getId(), result.getId());
+    }
+
+    @Test
+    void getAboutBooking_noAccess_shouldThrow() {
+        UserDto owner = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@mail.com")
+                .build());
+
+        UserDto booker = userService.createUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@mail.com")
+                .build());
+
+        UserDto stranger = userService.createUser(UserDto.builder()
+                .name("Stranger")
+                .email("stranger@mail.com")
+                .build());
+
+        ItemDto item = itemService.addItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingDto booking = bookingService.create(booker.getId(), BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build());
+
+        assertThrows(NotOwnerException.class,
+                () -> bookingService.getAboutBooking(stranger.getId(), booking.getId()));
     }
 
     @Test
