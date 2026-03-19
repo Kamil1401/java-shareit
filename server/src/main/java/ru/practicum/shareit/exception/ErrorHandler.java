@@ -17,25 +17,25 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse isNotTheOwnerException(final NotOwnerException e) {
+    public ErrorResponse handleNotOwnerException(final NotOwnerException e) {
         return new ErrorResponse("Редактирование невозможно", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse duplicateException(final DuplicateException e) {
+    public ErrorResponse handleDuplicateException(final DuplicateException e) {
         return new ErrorResponse("Ошибка", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse ownItemBookingException(final ValidationException e) {
+    public ErrorResponse handleValidationException(final ValidationException e) {
         return new ErrorResponse("Ошибка валидации", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse notAvailableException(final IllegalStateException e) {
+    public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
         return new ErrorResponse("Бронь невозможна", e.getMessage());
     }
 }
