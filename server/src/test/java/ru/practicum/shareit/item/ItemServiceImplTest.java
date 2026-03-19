@@ -165,6 +165,30 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void updateItem_descriptionAndAvailable() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("User")
+                .email("user@test.com")
+                .build());
+
+        ItemDto item = itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Old desc")
+                .available(true)
+                .build());
+
+        ItemDto update = ItemDto.builder()
+                .description("New desc")
+                .available(false)
+                .build();
+
+        ItemDto updated = itemService.updateItem(user.getId(), item.getId(), update);
+
+        assertEquals("New desc", updated.getDescription());
+        assertFalse(updated.getAvailable());
+    }
+
+    @Test
     void getAboutItem() {
         UserDto user = userService.createUser(UserDto.builder()
                 .name("Orochimaro")
@@ -187,6 +211,30 @@ class ItemServiceImplTest {
         ItemDto result = itemService.getAboutItem(item.getId());
 
         assertEquals(1, result.getComments().size());
+    }
+
+    @Test
+    void getAllItems() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Кларк")
+                .email("Kent@smallville.com")
+                .build());
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Karcher CVH 3")
+                .description("Пылесос для автомобиля")
+                .available(true)
+                .build());
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Арбалет")
+                .description("В комплекте стрелы")
+                .available(true)
+                .build());
+
+        List<Item> items = itemService.getAllItems();
+
+        assertEquals(2, items.size());
     }
 
     @Test
@@ -229,6 +277,32 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void getItemsByRequestIdIn() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("ReqUser")
+                .email("req@mail.com")
+                .build());
+
+        ItemRequest request = new ItemRequest();
+        request.setDescription("Запрос");
+        request.setCreated(LocalDateTime.now());
+        request.setRequestor(entityManager.find(User.class, user.getId()));
+        entityManager.persist(request);
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .requestId(request.getId())
+                .build());
+
+        List<Item> result = itemService.getItemsByRequestIdIn(List.of(request.getId()));
+
+        assertEquals(1, result.size());
+        assertEquals(request.getId(), result.getFirst().getRequest().getId());
+    }
+
+    @Test
     void searchItems() {
         UserDto user = userService.createUser(UserDto.builder()
                 .name("Shikamaru")
@@ -247,10 +321,59 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void searchItems_notFound_shouldReturnEmpty() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("SearchUser")
+                .email("search@mail.com")
+                .build());
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Телефон")
+                .description("iPhone")
+                .available(true)
+                .build());
+
+        List<ItemDto> result = itemService.searchItems("Ноутбук");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void searchItems_blank_shouldReturnEmpty() {
         List<ItemDto> result = itemService.searchItems("");
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void searchItems_null_shouldReturnEmpty() {
+        List<ItemDto> result = itemService.searchItems(null);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findByOwnerId() {
+        UserDto user = userService.createUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Item1")
+                .description("Desc1")
+                .available(true)
+                .build());
+
+        itemService.addItem(user.getId(), ItemDto.builder()
+                .name("Item2")
+                .description("Desc2")
+                .available(true)
+                .build());
+
+        List<Item> items = itemService.findByOwnerId(user.getId());
+
+        assertEquals(2, items.size());
     }
 
     @Test
