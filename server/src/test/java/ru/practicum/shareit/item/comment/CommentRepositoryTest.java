@@ -27,10 +27,10 @@ class CommentRepositoryTest {
 
     @Test
     void findByItemIdOrderByCreatedAsc() {
-        User user = new User();
-        user.setName("Peter");
-        user.setEmail("parker@dailybugle.com");
-        User author = userRepository.save(user);
+        User userAuthor = new User();
+        userAuthor.setName("Peter");
+        userAuthor.setEmail("parker@dailybugle.com");
+        User author = userRepository.save(userAuthor);
 
         User ownerUser = new User();
         ownerUser.setName("Tony");
