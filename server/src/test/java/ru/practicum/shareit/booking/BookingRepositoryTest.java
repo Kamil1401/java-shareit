@@ -520,7 +520,7 @@ class BookingRepositoryTest {
         booking.setItem(savedItem);
         booking.setBooker(booker);
         booking.setStatus(BookingStatus.WAITING);
-        Booking savedBooking = bookingRepository.save(booking);
+        bookingRepository.save(booking);
 
         assertTrue(bookingRepository
                 .existsByItemIdAndBookerIdAndEndBefore(savedItem.getId(), booker.getId(), LocalDateTime.now()));
