@@ -11,6 +11,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,7 +29,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public ItemRequestDto addRequest(Long userId, ItemRequestDto dto) {
         User requestor = userService.getUserById(userId);
         ItemRequest request = ItemRequestMapper.toEntity(dto);
+
         request.setRequestor(requestor);
+        request.setCreated(LocalDateTime.now());
+        
         ItemRequest savedRequest = requestRepository.save(request);
 
         return ItemRequestMapper.toDto(savedRequest);
