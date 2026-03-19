@@ -6,8 +6,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class UserRepositoryTest {
@@ -44,5 +43,17 @@ class UserRepositoryTest {
 
         assertEquals(users.getFirst().getEmail(), savedUser1.getEmail());
         assertEquals(users.getLast().getEmail(), savedUser2.getEmail());
+    }
+
+    @Test
+    void findByEmail() {
+        User user = new User();
+        user.setName("Reed");
+        user.setEmail("Richards@foursome.com");
+        userRepository.save(user);
+
+        assertEquals("Richards@foursome.com", userRepository.findByEmail(user.getEmail()).get().getEmail());
+        assertTrue(userRepository.findByEmail("Richards@foursome.com").isPresent());
+        assertNotNull(userRepository.findByEmail(user.getEmail()).get().getId());
     }
 }

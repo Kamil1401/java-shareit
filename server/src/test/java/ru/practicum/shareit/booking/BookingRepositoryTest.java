@@ -496,6 +496,100 @@ class BookingRepositoryTest {
     }
 
     @Test
+    void findByItemIdAndStartBeforeAndStatusOrderByStartDesc() {
+        User user1 = new User();
+        user1.setName("Name1");
+        user1.setEmail("name1@mail.com");
+        User owner = userRepository.save(user1);
+
+        User user2 = new User();
+        user2.setName("Name2");
+        user2.setEmail("name2@mail.com");
+        User booker = userRepository.save(user2);
+
+        Item item = new Item();
+        item.setName("Item");
+        item.setDescription("Very good item");
+        item.setAvailable(true);
+        item.setOwner(owner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking booking = new Booking();
+        booking.setStart(LocalDateTime.of(2026, 1, 29, 1, 0));
+        booking.setEnd(LocalDateTime.of(2026, 1, 29, 4, 0));
+        booking.setItem(savedItem);
+        booking.setBooker(booker);
+        booking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking);
+
+        Booking booking2 = new Booking();
+        booking2.setStart(LocalDateTime.of(2026, 4, 30, 1, 0));
+        booking2.setEnd(LocalDateTime.of(2026, 4, 30, 4, 0));
+        booking2.setItem(savedItem);
+        booking2.setBooker(booker);
+        booking2.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking2);
+
+        List<Booking> bookings = bookingRepository
+                .findByItemIdAndStartBeforeAndStatusOrderByStartDesc(
+                        savedItem.getId(),
+                        LocalDateTime.now(),
+                        BookingStatus.APPROVED);
+
+        assertEquals(1, bookings.size());
+        assertEquals(BookingStatus.APPROVED, bookings.getFirst().getStatus());
+        assertEquals(savedItem.getId(), bookings.getFirst().getItem().getId());
+        assertTrue(bookings.getFirst().getStart().isBefore(LocalDateTime.now()));
+    }
+
+    @Test
+    void findByItemIdAndStartAfterAndStatusOrderByStartAsc() {
+        User user1 = new User();
+        user1.setName("Name1");
+        user1.setEmail("name1@mail.com");
+        User owner = userRepository.save(user1);
+
+        User user2 = new User();
+        user2.setName("Name2");
+        user2.setEmail("name2@mail.com");
+        User booker = userRepository.save(user2);
+
+        Item item = new Item();
+        item.setName("Item");
+        item.setDescription("Very good item");
+        item.setAvailable(true);
+        item.setOwner(owner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking booking = new Booking();
+        booking.setStart(LocalDateTime.of(2026, 1, 29, 1, 0));
+        booking.setEnd(LocalDateTime.of(2026, 1, 29, 4, 0));
+        booking.setItem(savedItem);
+        booking.setBooker(booker);
+        booking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking);
+
+        Booking booking2 = new Booking();
+        booking2.setStart(LocalDateTime.of(2026, 4, 30, 1, 0));
+        booking2.setEnd(LocalDateTime.of(2026, 4, 30, 4, 0));
+        booking2.setItem(savedItem);
+        booking2.setBooker(booker);
+        booking2.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking2);
+
+        List<Booking> bookings = bookingRepository
+                .findByItemIdAndStartAfterAndStatusOrderByStartAsc(
+                        savedItem.getId(),
+                        LocalDateTime.now(),
+                        BookingStatus.APPROVED);
+
+        assertEquals(1, bookings.size());
+        assertEquals(BookingStatus.APPROVED, bookings.getFirst().getStatus());
+        assertEquals(savedItem.getId(), bookings.getFirst().getItem().getId());
+        assertTrue(bookings.getFirst().getStart().isAfter(LocalDateTime.now()));
+    }
+
+    @Test
     void existsByItemIdAndBookerIdAndEndBefore() {
         User user1 = new User();
         user1.setName("Name1");
