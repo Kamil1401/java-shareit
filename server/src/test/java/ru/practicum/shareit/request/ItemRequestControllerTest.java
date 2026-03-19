@@ -145,7 +145,8 @@ class ItemRequestControllerTest {
         when(requestService.getAboutItemRequest(eq(3L)))
                 .thenReturn(dto);
 
-        mvc.perform(get("/requests/3"))
+        mvc.perform(get("/requests/3")
+                        .header("X-Sharer-User-Id", 30L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.description").value("Ищу пароочиститель"));
