@@ -32,7 +32,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         request.setRequestor(requestor);
         request.setCreated(LocalDateTime.now());
-        
         ItemRequest savedRequest = requestRepository.save(request);
 
         return ItemRequestMapper.toDto(savedRequest);
