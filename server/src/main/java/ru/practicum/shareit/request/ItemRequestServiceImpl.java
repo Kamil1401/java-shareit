@@ -79,7 +79,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest request = getItemRequestById(requestId);
 
         List<ItemShortDto> answers = ItemMapper.toShortList(itemRepository.findAll().stream()
-                .filter(item -> item.getRequest().getId().equals(requestId))
+                .filter(item -> item.getRequest() != null
+                        && item.getRequest().getId().equals(requestId))
                 .toList());
 
         ItemRequestDto dto = ItemRequestMapper.toDto(request);
