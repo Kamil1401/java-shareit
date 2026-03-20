@@ -50,9 +50,9 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(booker);
         booking.setStatus(BookingStatus.WAITING);
 
-        bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
 
-        return BookingMapper.toDto(booking);
+        return BookingMapper.toDto(savedBooking);
     }
 
 

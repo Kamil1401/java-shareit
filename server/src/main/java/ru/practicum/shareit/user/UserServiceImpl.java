@@ -26,9 +26,9 @@ public class UserServiceImpl implements UserService {
             throw new DuplicateException("Пользователь с таким Email уже существует");
         }
         User user = UserMapper.toEntity(dto);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        return UserMapper.toDto(user);
+        return UserMapper.toDto(savedUser);
     }
 
     @Override
