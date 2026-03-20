@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class BookingDto {
+
+    @Positive
     private Long id;
 
     @NotNull(message = "Дата начала обязательна")
