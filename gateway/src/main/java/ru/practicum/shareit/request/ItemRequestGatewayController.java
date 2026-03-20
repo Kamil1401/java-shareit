@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-@Controller
+@RestController
 @RequestMapping("/requests")
 @RequiredArgsConstructor
 @Slf4j

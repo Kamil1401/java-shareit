@@ -15,10 +15,7 @@ public class ItemRequestMapper {
 
     public static ItemRequest toEntity(ItemRequestDto dto) {
         ItemRequest request = new ItemRequest();
-
-        request.setId(dto.getId());
         request.setDescription(dto.getDescription());
-        request.setCreated(dto.getCreated());
 
         return request;
     }

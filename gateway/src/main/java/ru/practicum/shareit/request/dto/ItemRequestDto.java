@@ -11,6 +11,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 public class ItemRequestDto {
