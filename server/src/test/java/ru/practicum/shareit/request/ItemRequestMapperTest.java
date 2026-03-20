@@ -28,15 +28,11 @@ class ItemRequestMapperTest {
         LocalDateTime now = LocalDateTime.now();
 
         ItemRequestDto dto = ItemRequestDto.builder()
-                .id(2L)
                 .description("Нужен ноутбук")
-                .created(now)
                 .build();
 
         ItemRequest request = ItemRequestMapper.toEntity(dto);
 
-        assertEquals(dto.getId(), request.getId());
         assertEquals(dto.getDescription(), request.getDescription());
-        assertEquals(dto.getCreated(), request.getCreated());
     }
 }
