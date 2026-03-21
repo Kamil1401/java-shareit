@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 
@@ -20,7 +19,6 @@ public class ItemRequestDto {
     @NotBlank
     private String description;
 
-    @NotNull
     private LocalDateTime created;
 
     private List<ItemShortDto> items;
