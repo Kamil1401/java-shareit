@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BookingDto {
 
-    @Positive
     private Long id;
 
     @NotNull

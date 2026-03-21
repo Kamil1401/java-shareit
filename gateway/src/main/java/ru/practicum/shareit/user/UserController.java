@@ -14,7 +14,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class UserGatewayController {
+public class UserController {
     private final UserClient userClient;
 
 
