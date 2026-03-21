@@ -42,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(owner);
 
         if (dto.getRequestId() != null) {
-            ItemRequest request = requestService.getItemRequestById(dto.getRequestId());
+            ItemRequest request = requestService.getItemRequestById(Long.valueOf(dto.getRequestId()));
             item.setRequest(request);
         }
 

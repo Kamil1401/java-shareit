@@ -38,7 +38,7 @@ class ItemMapperTest {
 
         ItemDto dto = ItemMapper.toDto(item);
 
-        assertEquals(request.getId(), dto.getRequestId());
+        assertEquals(request.getId(), Long.valueOf(dto.getRequestId()));
     }
 
     @Test

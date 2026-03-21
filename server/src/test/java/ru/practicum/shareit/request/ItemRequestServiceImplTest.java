@@ -101,7 +101,7 @@ class ItemRequestServiceImplTest {
                 .name("Drill")
                 .description("Tool")
                 .available(true)
-                .requestId(request.getId())
+                .requestId(request.getId().toString())
                 .build());
 
         ItemRequestDto result = requestService.getAboutItemRequest(request.getId());
@@ -159,14 +159,14 @@ class ItemRequestServiceImplTest {
                 .name("Desert Eagle Mark XIX")
                 .description("Необходимо предъявить разрешение")
                 .available(true)
-                .requestId(requestWithId1.getId())
+                .requestId(requestWithId1.getId().toString())
                 .build();
 
         ItemDto secondItemDto = ItemDto.builder()
                 .name("Beretta 92FS")
                 .description("Необходимо предъявить разрешение")
                 .available(true)
-                .requestId(requestWithId2.getId())
+                .requestId(requestWithId2.getId().toString())
                 .build();
 
         itemService.addItem(ownerDto.getId(), firstItemDto);

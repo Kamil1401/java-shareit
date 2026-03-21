@@ -53,7 +53,7 @@ class ItemServiceImplTest {
                 .name("Меч")
                 .description("Брать только Блэйду")
                 .available(true)
-                .requestId(request.getId())
+                .requestId(request.getId().toString())
                 .build();
 
         ItemDto saved = itemService.addItem(user.getId(), dto);
@@ -293,7 +293,7 @@ class ItemServiceImplTest {
                 .name("Item")
                 .description("Desc")
                 .available(true)
-                .requestId(request.getId())
+                .requestId(request.getId().toString())
                 .build());
 
         List<Item> result = itemService.getItemsByRequestIdIn(List.of(request.getId()));
